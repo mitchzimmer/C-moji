@@ -2,7 +2,7 @@
 
 yacc -d emoji.y
 lex emoji.l
-gcc lex.yy.c y.tab.c -o output
+gcc lex.yy.c y.tab.c -o output -lm
 echo PARSER STARTED :
 
 ./output input.emoji > outfile
