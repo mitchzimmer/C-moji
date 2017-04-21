@@ -1,4 +1,4 @@
-SNAKE ~+8\}
+SNAKE ~~+8\}
 CATERPILLAR \(:@+D
 BINARYDOTS [:.]+
 SLEEPY \(-\.-\)[Zz]+
@@ -22,6 +22,7 @@ extern char * concat(const char *strings[], int length);
 %%
 ":(" { return(OPEN_PAR); }
 "8)" { return(QUOTE); }
+":,)" { return(COMMA); }
 ":)" { return(CLOSE_PAR); }
 ":}" { return(CLOSE_CURL); }
 ":{" { return(OPEN_CURL); }
@@ -30,6 +31,8 @@ extern char * concat(const char *strings[], int length);
 "@:-)" { return(INT); }
 "@@:-)" { return(CHAR); }
 "@@@:-)" { return(CHAR_ARR); }
+"~8}" { return(MAIN); }
+"}:)" { return(RETURN); }
 "(>'.')>" { return(PRINT); }
 "<('.'<)" { return(ASSIGN); }
 "C(_)" { return(WHILE); }
@@ -47,7 +50,7 @@ extern char * concat(const char *strings[], int length);
 "==:]" { return(EQ); }
 "</3" { return(BREAK); }
 {BINARYDOTS} {yylval.string = getNumForEmoji(strdup(yytext)); return(NUM); }
-{SLEEPY} { yylval.string = getCharForEmoji(strdup(yytext)); return(CHAR); }
+{SLEEPY} { yylval.string = getCharForEmoji(strdup(yytext)); return(CHARE); }
 {CATERPILLAR} { yylval.string = getVarNameForEmoji(strdup(yytext)); return(VAR); }
 {SNAKE} { yylval.string = getFuncNameForEmoji(strdup(yytext)); return(FUNCVAR); }
 [ \t\r\n] ; /* Used to remove additional whitespace which gets dumped into output */
@@ -68,13 +71,13 @@ char * toArray(int num)
 {
 	//Get length of number
 	int n = log10(num) + 1;
-	
+
 	//Create a string to load the number into
 	char * str = malloc(n*sizeof(char));
-	
+
 	//Print number to new string
 	sprintf(str, "%d", num);
-	
+
 	return str;
 }
 
@@ -84,7 +87,7 @@ char * toArray(int num)
 char * getCharForEmoji(const char *emoji){
 	int length = strlen(emoji);
 	int value = 0;
-	
+
 	//start at index 5 to accomodate sleeping emoji
 	for(int i = 5; i< length; i++)
 	{
@@ -116,7 +119,7 @@ char * getNumForEmoji(const char *emoji)
 	}
 	//Convert to value to ascii character connected to value
 	char i = value;
-	
+
 	return toArray(value);
 }
 
