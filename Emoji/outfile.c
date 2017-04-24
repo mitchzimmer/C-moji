@@ -18,4 +18,5 @@ cout << a3;
 cout << a3;
 cout << a4;
 cout << a5;
+int a10 = 0;
 }

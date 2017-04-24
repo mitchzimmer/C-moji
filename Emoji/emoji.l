@@ -69,6 +69,9 @@ int countChar(const char * str, char c){
 //Convert number to character array
 char * toArray(int num)
 {
+	if(num == 0) {
+		return "0";	
+	}
 	//Get length of number
 	int n = log10(num) + 1;
 
@@ -110,6 +113,7 @@ char * getNumForEmoji(const char *emoji)
 {
 	int length = strlen(emoji);
 	int value = 0;
+
 	for(int i = 0; i<length; i++)
 	{
 		if(emoji[i] == ':')
@@ -117,9 +121,6 @@ char * getNumForEmoji(const char *emoji)
 			value += 1 << (length - 1 - i);
 		}
 	}
-	//Convert to value to ascii character connected to value
-	char i = value;
-
 	return toArray(value);
 }
 
