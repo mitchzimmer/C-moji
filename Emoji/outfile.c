@@ -7,16 +7,22 @@ using namespace std;
 
 int main()
 {
-char a1 = 'H';
-char a2 = 'e';
-char a3 = 'l';
-char a4 = 'o';
-char a5 = 'Â';
-cout << a1;
-cout << a2;
-cout << a3;
-cout << a3;
-cout << a4;
+int a2 = 0;
+int a3 = 0;
+int a4 = 12;
+int a5 = 0;
+while(a2 < a4){
+while(a3 <= a2){
+if(a2 * a3 == a4){
+a5 = 1;
+break;
+}
+else{
+}
+a3 = a3 + 1;
+}
+a2 = a2 + 1;
+a3 = 0;
+}
 cout << a5;
-int a10 = 0;
 }

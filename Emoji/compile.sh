@@ -7,7 +7,7 @@ echo PARSER STARTED :
 
 ./output input.emoji > outfile.c
 
-rm -f lex.yy.c
-rm -f y.tab.c
-rm -f y.tab.h
-rm -f output
+#rm -f lex.yy.c
+#rm -f y.tab.c
+#rm -f y.tab.h
+#rm -f output
