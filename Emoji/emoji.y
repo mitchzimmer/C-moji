@@ -22,11 +22,11 @@
 %token QUOTE SEMI_COLON COMMA
 %token VOID INT CHAR CHAR_ARR
 %token ASSIGN MAIN RETURN
-%token PRINT
+%token PRINT NEWLINE
 %token WHILE ELSE IF
 %token CONTINUE BREAK
 %token MULT MINUS PLUS
-%token NOT_EQ GT_EQ LT_EQ LT GT EQ
+%token NOT_EQ GT_EQ LT_EQ LT GT EQ AND OR
 
 %token <string> FUNCVAR
 %token <string> VAR
@@ -50,11 +50,19 @@
 %type <string> bvalue;
 %type <string> math_expr;
 %type <string> mvalue;
+%type <string> call_function;
+%type <string> call_def_args;
+%type <string> call_def_args_extra;
 
-%left NOT_EQ GT LT GT_EQ LT_EQ EQ MULT MINUS PLUS
+// defining left association to get rid of ambiguity
+%left NOT_EQ GT LT GT_EQ LT_EQ EQ MULT MINUS PLUS AND OR
+
 %start program
 
 %%
+//==============================================================================
+//==============================================================================
+// The program start
 program:  extern_var_declaration function main         {
                                                             printf("#include <stdio.h>\n#include <iostream>\n#include <stdlib.h>\nusing namespace std;\n\n%s\n%s\n%s",$1,$2,$3);
                                                        }
@@ -71,7 +79,7 @@ extern_var_declaration: variable ASSIGN value SEMI_COLON extern_var_declaration 
           |                                            { $$ = ""; }
           ;
 
-var_declaration: variable ASSIGN mvalue SEMI_COLON      {
+var_declaration: variable ASSIGN mvalue SEMI_COLON     {
                                                             const char * array[] = {$1, " = ", $3, ";\n"};
                                                             $$ = concat(array, 4);
                                                        }
@@ -103,6 +111,12 @@ function: FUNCVAR func_type OPEN_PAR def_args
                                                             const char * array[] = {$2, $1, "(", $4, ")\n", $6, "\n", $7};
                                                             $$ = concat(array, 8);
                                                        }
+          | FUNCVAR func_type OPEN_PAR
+          //intentionally not or'ed
+          CLOSE_PAR lines function                     {
+                                                            const char * array[] = {$2, $1, "()\n", $5, "\n", $6};
+                                                            $$ = concat(array, 6);
+                                                       }
           |                                            { $$ = ""; }
           ;
 
@@ -111,8 +125,7 @@ func_type: VOID                                        { $$ = "void ";}
           | var_type                                   { $$ = $1; }
           ;
 
-def_args: variable def_args_extra
-                                                       {
+def_args: variable def_args_extra                      {
                                                             const char * array[] = {$1, $2};
                                                             $$ = concat(array, 2);
                                                        }
@@ -127,8 +140,34 @@ def_args_extra: COMMA variable def_args_extra          {
 
 //==============================================================================
 //==============================================================================
+// Call functions parts
+call_function: FUNCVAR OPEN_PAR call_def_args CLOSE_PAR{
+                                                            const char * array[] = {$1, "(", $3, ")"};
+                                                            $$ = concat(array, 4);
+                                                       }
+          | FUNCVAR OPEN_PAR CLOSE_PAR                 {
+                                                            const char * array[] = {$1, "(", ")"};
+                                                            $$ = concat(array, 3);
+                                                       }
+          ;
+
+call_def_args: VAR call_def_args_extra                 {
+                                                            const char * array[] = {$1, $2};
+                                                            $$ = concat(array, 2);
+                                                       }
+          ;
+
+call_def_args_extra: COMMA VAR call_def_args_extra     {
+                                                            const char * array[] = {", ", $2, $3};
+                                                            $$ = concat(array, 3);
+                                                       }
+          |                                            { $$ = ""; }
+          ;
+
+//==============================================================================
+//==============================================================================
 // Main function
-main: MAIN lines     {
+main: MAIN lines                                       {
                                                             const char * array[] = {"int main()\n", $2};
                                                             $$ = concat(array, 2);
                                                        }
@@ -137,7 +176,7 @@ main: MAIN lines     {
 //==============================================================================
 //==============================================================================
 // Blocks
-lines: OPEN_CURL line CLOSE_CURL                        {
+lines: OPEN_CURL line CLOSE_CURL                       {
                                                             const char * array[] = {"{\n", $2, "}\n"};
                                                             $$ = concat(array, 3);
                                                        }
@@ -151,9 +190,21 @@ line: var_declaration line                             {
                                                             const char * array[] = {$1, " = ", $3, ";\n", $5};
                                                             $$ = concat(array, 5);
                                                        }
+          | call_function SEMI_COLON line              {
+                                                            const char * array[] = {$1, ";\n", $3};
+                                                            $$ = concat(array, 3);
+                                                       }
           | PRINT expr SEMI_COLON line                 {
                                                             const char * array[] = {"cout << ", $2, ";\n", $4};
                                                             $$ = concat(array, 4);
+                                                       }
+          | PRINT NEWLINE SEMI_COLON line              {
+                                                            const char * array[] = {"cout << endl;\n", $4};
+                                                            $$ = concat(array, 2);
+                                                       }
+          | IF bool_expr lines line                    {
+                                                            const char * array[] = {"if(", $2, ")", $3, $4};
+                                                            $$ = concat(array, 5);
                                                        }
           | IF bool_expr lines ELSE lines line         {
                                                             const char * array[] = {"if(", $2, ")", $3, "else", $5, $6};
@@ -204,9 +255,17 @@ bool_expr: mvalue LT mvalue                            {
                                                             const char * array[] = {$1, " == ", $3};
                                                             $$ = concat(array, 3);
                                                        }
+          | bvalue AND bvalue                          {
+                                                            const char * array[] = {$1, " == ", $3};
+                                                            $$ = concat(array, 3);
+                                                       }
+          | bvalue OR bvalue                           {
+                                                            const char * array[] = {$1, " == ", $3};
+                                                            $$ = concat(array, 3);
+                                                       }
           ;
 
-bvalue: mvalue                                          {$$ = $1;}
+bvalue: mvalue                                         {$$ = $1;}
           | bool_expr                                  {$$ = $1;}
           | OPEN_PAR bool_expr CLOSE_PAR               {
                                                             const char * array[] = {"(", $2, ")"};
@@ -231,6 +290,7 @@ math_expr: mvalue PLUS mvalue                          {
 mvalue: value                                          {$$ = $1;}
           | math_expr                                  {$$ = $1;}
           | VAR                                        {$$ = $1;}
+          | call_function                              {$$ = $1;}
           | OPEN_PAR math_expr CLOSE_PAR               {
                                                             const char * array[] = {"(", $2, ")"};
                                                             $$ = concat(array, 3);

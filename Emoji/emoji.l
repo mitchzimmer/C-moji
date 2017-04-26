@@ -34,6 +34,7 @@ extern char * concat(const char *strings[], int length);
 "~8}" { return(MAIN); }
 "}:)" { return(RETURN); }
 "(>'.')>" { return(PRINT); }
+"^V^" { return(NEWLINE); }
 "<('.'<)" { return(ASSIGN); }
 "C(_)" { return(WHILE); }
 "o.O" { return(ELSE); }
@@ -48,6 +49,8 @@ extern char * concat(const char *strings[], int length);
 "<:]" { return(LT); }
 ">:]" { return(GT); }
 "==:]" { return(EQ); }
+"&:]" { return(AND); }
+"|:]" { return(OR); }
 "</3" { return(BREAK); }
 {BINARYDOTS} {yylval.string = getNumForEmoji(strdup(yytext)); return(NUM); }
 {SLEEPY} { yylval.string = getCharForEmoji(strdup(yytext)); return(CHARE); }
@@ -70,7 +73,7 @@ int countChar(const char * str, char c){
 char * toArray(int num)
 {
 	if(num == 0) {
-		return "0";	
+		return "0";
 	}
 	//Get length of number
 	int n = log10(num) + 1;
