@@ -151,13 +151,13 @@ call_function: FUNCVAR OPEN_PAR call_def_args CLOSE_PAR{
                                                        }
           ;
 
-call_def_args: VAR call_def_args_extra                 {
+call_def_args: expr call_def_args_extra                 {
                                                             const char * array[] = {$1, $2};
                                                             $$ = concat(array, 2);
                                                        }
           ;
 
-call_def_args_extra: COMMA VAR call_def_args_extra     {
+call_def_args_extra: COMMA expr call_def_args_extra     {
                                                             const char * array[] = {", ", $2, $3};
                                                             $$ = concat(array, 3);
                                                        }

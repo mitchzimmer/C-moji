@@ -10,8 +10,7 @@ if ! [[ $1 =~ $REGEX ]] ; then
      exit 0
 fi
 
-if [ ! -f "$1" ]
-then
+if [ ! -f "$1" ] ; then
     echo "File $1 does not exists"
     exit 0
 fi

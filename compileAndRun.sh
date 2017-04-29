@@ -10,14 +10,12 @@ if ! [[ $1 =~ $REGEX ]] ; then
      exit 0
 fi
 
-if [ ! -f "$1" ]
-then
+if [ ! -f "$1" ] ; then
     echo "File $1 does not exists"
     exit 0
 fi
 
 out=`echo "$1" | sed 's/oji/cpp/g'`
-set -e
 yacc -d emoji.y
 lex emoji.l
 
@@ -32,6 +30,13 @@ rm -f output
 
 cout=`echo "$out" | sed 's/.cpp//g'`
 
-g++ $out -o $cout
+if ! g++ $out -o $cout ; then
+     echo "C++ compiling failed"
+     rm -f $out
+     exit 0
+fi
+
+rm -f $out
 
 ./$cout
+printf "\n"
