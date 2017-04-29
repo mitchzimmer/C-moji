@@ -33,3 +33,5 @@ rm -f output
 cout=`echo "$out" | sed 's/.cpp//g'`
 
 g++ $out -o $cout
+
+./$cout

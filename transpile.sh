@@ -29,7 +29,3 @@ rm -f lex.yy.c
 rm -f y.tab.c
 rm -f y.tab.h
 rm -f output
-
-cout=`echo "$out" | sed 's/.cpp//g'`
-
-g++ $out -o $cout
